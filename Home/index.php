@@ -1,5 +1,16 @@
 <?php 
 require_once 'db.php';
+if (session_status() === PHP_SESSION_NONE) session_start();
+
+// Determine display name from session (server-side). Falls back to 'Tài khoản'.
+$displayName = 'Tài khoản';
+if (!empty($_SESSION['first_name'])) {
+    $displayName = htmlspecialchars($_SESSION['first_name'] . (empty($_SESSION['last_name']) ? '' : ' ' . $_SESSION['last_name']));
+} elseif (!empty($_SESSION['email'])) {
+    // fallback to email local-part
+    $email = $_SESSION['email'];
+    $displayName = htmlspecialchars(explode('@', $email)[0]);
+}
 ?>
 <!doctype html>
 <html lang="vi">
@@ -117,7 +128,7 @@ require_once 'db.php';
             <!-- SEARCH (hidden on xs) -->
             <div class="search-bar hidden md:flex flex-1 max-w-xs mx-4">
                 <div class="w-full relative">
-                    <input id="searchInput" type="text" placeholder="Tìm kiếm sản phẩm..." class="w-full px-4 py-2 rounded-lg text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" />
+                    <input id="searchInput" type="text" placeholder="Tìm kiếm sản phẩm..." class="w-full px-4 py-2 rounded-lg text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ri[...]" />
                     <button aria-label="Tìm kiếm" class="absolute right-2 top-2 text-gray-600">
                         <i class="fas fa-search"></i>
                     </button>
@@ -128,7 +139,7 @@ require_once 'db.php';
             <div class="right-icons flex items-center gap-4">
                 <div class="hidden md:flex items-center gap-2 cursor-pointer hover:text-red-500">
                     <i class="fas fa-user text-xl"></i>
-                    <span class="text-sm font-medium">Tài khoản</span>
+                    <span id="accountLabel" class="text-sm font-medium"><?php echo $displayName; ?></span>
                 </div>
                 <a href="cart.php" class="flex items-center gap-2 cursor-pointer hover:text-red-500 relative">
                     <i class="fas fa-shopping-cart text-xl"></i>
@@ -257,324 +268,3 @@ require_once 'db.php';
                 </div>
 
                 <!-- Copy other product cards similarly -->
-                <div class="product-card bg-white rounded-lg overflow-hidden shadow-sm">
-                    <div class="bg-gray-200 h-48 flex items-center justify-center overflow-hidden">
-                        <img src="Pics/placeholder.png" alt="Sản phẩm 2" class="w-full h-full object-cover" />
-                    </div>
-                    <div class="p-4">
-                        <h3 class="font-bold text-gray-800 mb-1">Bộ Bát Đĩa 24 Chiếc Trắng</h3>
-                        <p class="text-sm text-gray-600 mb-3">Bộ bát đĩa nhập khẩu, tặng phô mai</p>
-                        <div class="flex items-center gap-2 mb-3">
-                            <span class="text-yellow-400"><i class="fas fa-star"></i></span>
-                            <span class="text-yellow-400"><i class="fas fa-star"></i></span>
-                            <span class="text-yellow-400"><i class="fas fa-star"></i></span>
-                            <span class="text-yellow-400"><i class="fas fa-star"></i></span>
-                            <span class="text-yellow-400"><i class="fas fa-star"></i></span>
-                            <span class="text-sm text-gray-600">(85)</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <span class="text-xl font-bold text-red-500">199.000đ</span>
-                                <span class="text-sm text-gray-500 line-through ml-2">350.000đ</span>
-                            </div>
-                            <button aria-label="Thêm vào giỏ" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg transition flex items-center">
-                                <i class="fas fa-cart-plus"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="product-card bg-white rounded-lg overflow-hidden shadow-sm">
-                    <div class="bg-gray-200 h-48 flex items-center justify-center overflow-hidden">
-                        <img src="Pics/placeholder.png" alt="Sản phẩm 3" class="w-full h-full object-cover" />
-                    </div>
-                    <div class="p-4">
-                        <h3 class="font-bold text-gray-800 mb-1">Bộ Lau Nhà 3 Màu Đa Năng</h3>
-                        <p class="text-sm text-gray-600 mb-3">Bộ dụng cụ làm sạch hiệu quả cao</p>
-                        <div class="flex items-center gap-2 mb-3">
-                            <span class="text-yellow-400"><i class="fas fa-star"></i></span>
-                            <span class="text-yellow-400"><i class="fas fa-star"></i></span>
-                            <span class="text-yellow-400"><i class="fas fa-star"></i></span>
-                            <span class="text-yellow-400"><i class="fas fa-star"></i></span>
-                            <span class="text-gray-300"><i class="fas fa-star"></i></span>
-                            <span class="text-sm text-gray-600">(56)</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <span class="text-xl font-bold text-red-500">89.000đ</span>
-                                <span class="text-sm text-gray-500 line-through ml-2">150.000đ</span>
-                            </div>
-                            <button aria-label="Thêm vào giỏ" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg transition flex items-center">
-                                <i class="fas fa-cart-plus"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="product-card bg-white rounded-lg overflow-hidden shadow-sm">
-                    <div class="bg-gray-200 h-48 flex items-center justify-center overflow-hidden">
-                        <img src="Pics/placeholder.png" alt="Sản phẩm 4" class="w-full h-full object-cover" />
-                    </div>
-                    <div class="p-4">
-                        <h3 class="font-bold text-gray-800 mb-1">Bộ Đèn LED Thông Minh</h3>
-                        <p class="text-sm text-gray-600 mb-3">Đèn LED điều chỉnh độ sáng tự động</p>
-                        <div class="flex items-center gap-2 mb-3">
-                            <span class="text-yellow-400"><i class="fas fa-star"></i></span>
-                            <span class="text-yellow-400"><i class="fas fa-star"></i></span>
-                            <span class="text-yellow-400"><i class="fas fa-star"></i></span>
-                            <span class="text-yellow-400"><i class="fas fa-star"></i></span>
-                            <span class="text-yellow-400"><i class="fas fa-star"></i></span>
-                            <span class="text-sm text-gray-600">(200)</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <span class="text-xl font-bold text-red-500">450.000đ</span>
-                                <span class="text-sm text-gray-500 line-through ml-2">650.000đ</span>
-                            </div>
-                            <button aria-label="Thêm vào giỏ" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg transition flex items-center">
-                                <i class="fas fa-cart-plus"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="text-center mt-8">
-                <button class="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-bold transition">
-                    Xem Tất Cả Sản Phẩm
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- PROMOTIONAL SECTION -->
-    <section class="bg-gradient-to-r from-red-500 to-red-600 text-white py-10 md:py-12">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <div class="bg-white bg-opacity-10 rounded-lg p-6 text-center">
-                    <i class="fas fa-shipping-fast text-3xl sm:text-4xl mb-3"></i>
-                    <h3 class="text-lg font-bold mb-2">Giao Hàng Nhanh</h3>
-                    <p>Giao hàng miễn phí cho đơn hàng từ 500.000đ</p>
-                </div>
-                <div class="bg-white bg-opacity-10 rounded-lg p-6 text-center">
-                    <i class="fas fa-shield-alt text-3xl sm:text-4xl mb-3"></i>
-                    <h3 class="text-lg font-bold mb-2">Bảo Hành Chính Hãng</h3>
-                    <p>Bảo hành 1 năm cho tất cả sản phẩm</p>
-                </div>
-                <div class="bg-white bg-opacity-10 rounded-lg p-6 text-center">
-                    <i class="fas fa-undo text-3xl sm:text-4xl mb-3"></i>
-                    <h3 class="text-lg font-bold mb-2">Đổi Trả Dễ Dàng</h3>
-                    <p>Đổi trả miễn phí trong 30 ngày</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- NEWSLETTER SECTION -->
-    <section class="bg-gray-100 py-10 md:py-12">
-        <div class="max-w-2xl mx-auto px-4 text-center">
-            <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-3">Nhận Thông Tin Khuyến Mãi</h2>
-            <p class="text-gray-600 mb-6">Đăng ký nhận email để cập nhật những khuyến mãi mới nhất</p>
-            <div class="flex flex-col sm:flex-row gap-3">
-                <input id="newsletterEmail" type="email" placeholder="Nhập email của bạn..." class="flex-1 px-4 py-3 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500" />
-                <button id="newsletterBtn" class="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-bold transition">Đăng Ký</button>
-            </div>
-        </div>
-    </section>
-
-    <!-- CONTACT SECTION -->
-    <section id="contact" class="bg-white py-12 md:py-16">
-        <div class="max-w-7xl mx-auto px-4">
-            <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-8 text-center">Liên Hệ Với Chúng Tôi</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
-                <div class="text-center">
-                    <div class="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-map-marker-alt text-2xl text-red-500"></i>
-                    </div>
-                    <h3 class="font-bold text-gray-800 mb-2">Địa chỉ</h3>
-                    <p class="text-gray-600">123 Đường Nguyễn Huệ, Quận 1, TP.HCM</p>
-                </div>
-                <div class="text-center">
-                    <div class="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-phone text-2xl text-red-500"></i>
-                    </div>
-                    <h3 class="font-bold text-gray-800 mb-2">Điện Thoại</h3>
-                    <p class="text-gray-600">(028) 3823 - 8888</p>
-                </div>
-                <div class="text-center">
-                    <div class="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-envelope text-2xl text-red-500"></i>
-                    </div>
-                    <h3 class="font-bold text-gray-800 mb-2">Email</h3>
-                    <p class="text-gray-600">info@chopgiadung.vn</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- FOOTER -->
-    <footer class="bg-[#1a1a1a] text-white py-10">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-                <div>
-                    <h3 class="font-bold text-lg mb-4">Về Chúng Tôi</h3>
-                    <p class="text-gray-400 text-sm">Chợ gia dụng lớn nhất Việt Nam với hàng ngàn sản phẩm chất lượng cao.</p>
-                </div>
-                <div>
-                    <h3 class="font-bold text-lg mb-4">Liên Kết Nhanh</h3>
-                    <ul class="text-gray-400 text-sm space-y-2">
-                        <li><a href="index.php" class="hover:text-red-500">Trang chủ</a></li>
-                        <li><a href="shop.php" class="hover:text-red-500">Sản phẩm</a></li>
-                        <li><a href="#categories" class="hover:text-red-500">Danh mục</a></li>
-                        <li><a href="#contact" class="hover:text-red-500">Liên hệ</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="font-bold text-lg mb-4">Hỗ Trợ Khách Hàng</h3>
-                    <ul class="text-gray-400 text-sm space-y-2">
-                        <li><a href="#" class="hover:text-red-500">Câu hỏi thường gặp</a></li>
-                        <li><a href="#" class="hover:text-red-500">Chính sách bảo hành</a></li>
-                        <li><a href="term.php" class="hover:text-red-500">Điều khoản dịch vụ</a></li>
-                        <li><a href="#" class="hover:text-red-500">Chính sách bảo mật</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="font-bold text-lg mb-4">Theo Dõi Chúng Tôi</h3>
-                    <div class="flex gap-4">
-                        <a href="#" class="bg-gray-700 hover:bg-red-500 w-10 h-10 rounded-full flex items-center justify-center transition">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="#" class="bg-gray-700 hover:bg-red-500 w-10 h-10 rounded-full flex items-center justify-center transition">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="bg-gray-700 hover:bg-red-500 w-10 h-10 rounded-full flex items-center justify-center transition">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="#" class="bg-gray-700 hover:bg-red-500 w-10 h-10 rounded-full flex items-center justify-center transition">
-                            <i class="fab fa-youtube"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <hr class="border-gray-700 mb-6" />
-
-            <div class="text-center text-gray-400 text-sm">
-                <p>&copy; 2024 Chợ Gia Dụng - Tất cả quyền được bảo lưu.</p>
-            </div>
-        </div>
-    </footer>
-
-    <script>
-        // Elements
-        const headerEl = document.querySelector('header');
-        const hamburger = document.querySelector('.hamburger-menu');
-        const mobileMenu = document.getElementById('mobileMenu');
-        const mobileCategoriesToggle = document.getElementById('mobileCategoriesToggle');
-        const mobileSubmenu = document.getElementById('mobileSubmenu');
-        const mobileCategoriesIcon = document.getElementById('mobileCategoriesIcon');
-
-        // Header scroll behavior
-        window.addEventListener('scroll', () => {
-            const sc = window.pageYOffset || document.documentElement.scrollTop;
-            if (sc > 80) headerEl.classList.add('scrolled');
-            else headerEl.classList.remove('scrolled');
-        });
-
-        // Toggle mobile main menu
-        function setMobileMenu(open) {
-            if (open) {
-                mobileMenu.classList.add('active');
-                mobileMenu.style.maxHeight = mobileMenu.scrollHeight + 'px';
-                hamburger.setAttribute('aria-expanded', 'true');
-            } else {
-                mobileMenu.classList.remove('active');
-                mobileMenu.style.maxHeight = null;
-                hamburger.setAttribute('aria-expanded', 'false');
-            }
-        }
-        hamburger && hamburger.addEventListener('click', () => {
-            setMobileMenu(!mobileMenu.classList.contains('active'));
-        });
-
-        // Toggle mobile categories submenu
-        mobileCategoriesToggle && mobileCategoriesToggle.addEventListener('click', () => {
-            const open = mobileSubmenu.classList.toggle('active');
-            if (open) {
-                mobileSubmenu.style.maxHeight = mobileSubmenu.scrollHeight + 'px';
-                mobileCategoriesIcon.classList.replace('fa-chevron-down', 'fa-chevron-up');
-            } else {
-                mobileSubmenu.style.maxHeight = null;
-                mobileCategoriesIcon.classList.replace('fa-chevron-up', 'fa-chevron-down');
-            }
-        });
-
-        // Close mobile menu when clicking outside or pressing ESC
-        document.addEventListener('click', (e) => {
-            const target = e.target;
-            if (!mobileMenu.contains(target) && !hamburger.contains(target) && mobileMenu.classList.contains('active')) {
-                setMobileMenu(false);
-            }
-        });
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                setMobileMenu(false);
-                if (mobileSubmenu.classList.contains('active')) {
-                    mobileSubmenu.classList.remove('active');
-                    mobileSubmenu.style.maxHeight = null;
-                    mobileCategoriesIcon.classList.replace('fa-chevron-up', 'fa-chevron-down');
-                }
-            }
-        });
-
-        // Collapse mobile menu and submenu when resizing to desktop
-        window.addEventListener('resize', () => {
-            if (window.innerWidth >= 768) {
-                setMobileMenu(false);
-                if (mobileSubmenu) {
-                    mobileSubmenu.classList.remove('active');
-                    mobileSubmenu.style.maxHeight = null;
-                    mobileCategoriesIcon && mobileCategoriesIcon.classList.replace('fa-chevron-up', 'fa-chevron-down');
-                }
-            }
-        });
-
-        // Close mobile menu when clicking links inside it
-        document.querySelectorAll('#mobileMenu a').forEach(a => {
-            a.addEventListener('click', () => setMobileMenu(false));
-        });
-
-        // Add-to-cart placeholders (delegated)
-        document.addEventListener('click', (e) => {
-            const btn = e.target.closest('button[aria-label="Thêm vào giỏ"]');
-            if (btn) {
-                // Placeholder: call your backend / cart logic here
-                console.log('Thêm vào giỏ hàng (placeholder)');
-            }
-        });
-
-        // Search enter behavior
-        const searchInput = document.getElementById('searchInput');
-        searchInput && searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                // Replace by actual search action
-                console.log('Tìm kiếm:', searchInput.value);
-                // Example: window.location.href = `/search?q=${encodeURIComponent(searchInput.value)}`;
-            }
-        });
-
-        // Newsletter placeholder
-        document.getElementById('newsletterBtn')?.addEventListener('click', () => {
-            const email = document.getElementById('newsletterEmail').value;
-            if (email) {
-                console.log('Đăng ký email (placeholder):', email);
-            } else {
-                alert('Vui lòng nhập email.');
-            }
-        });
-
-        // Utility
-        function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
-    </script>
-</body>
-</html>
