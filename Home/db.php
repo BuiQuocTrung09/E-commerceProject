@@ -11,12 +11,20 @@ try {
     $pdo->exec("CREATE DATABASE IF NOT EXISTS `$dbname` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
     $pdo->exec("USE `$dbname`");
 
+    // Bảng users được mở rộng để lưu đầy đủ thông tin từ form register.php
     $pdo->exec("CREATE TABLE IF NOT EXISTS users (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        username VARCHAR(50) NOT NULL,
+        first_name VARCHAR(50) NOT NULL,
+        last_name VARCHAR(50) NOT NULL,
+        gender ENUM('male','female','other') DEFAULT 'other',
         email VARCHAR(100) NOT NULL UNIQUE,
+        phone VARCHAR(20),
+        address VARCHAR(255),
+        city VARCHAR(100),
         password VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX (email),
+        INDEX (phone)
     )");
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS categories (
