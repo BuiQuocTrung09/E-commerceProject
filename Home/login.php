@@ -376,7 +376,7 @@
             </div>
 
             <div class="register-link">
-                Chưa có tài khoản? <a href="register.html">Đăng Ký Ngay</a>
+                Chưa có tài khoản? <a href="register.php">Đăng Ký Ngay</a>
             </div>
         </div>
     </div>
@@ -437,7 +437,7 @@
                     showSuccess('Đăng nhập thành công! Đang chuyển hướng...');
                     setTimeout(() => {
                         // Trong thực tế, chuyển hướng tới trang chủ hoặc dashboard
-                        window.location.href = 'Home/index.html';
+                        window.location.href = 'index/index.php';
                     }, 1500);
                 } else {
                     showError('Email hoặc mật khẩu không chính xác. (Demo: test@example.com / Password123)');

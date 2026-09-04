@@ -382,7 +382,7 @@
             </div>
 
             <div class="login-link">
-                Đã có tài khoản? <a href="login.html">Đăng Nhập</a>
+                Đã có tài khoản? <a href="login.php">Đăng Nhập</a>
             </div>
         </div>
     </div>
@@ -462,7 +462,7 @@
             showSuccess('Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.');
             setTimeout(() => {
                 // Chuyển hướng tới trang login
-                window.location.href = 'login.html';
+                window.location.href = 'login.php';
             }, 2000);
         });
 

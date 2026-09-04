@@ -115,7 +115,7 @@
     <header class="bg-[#1a1a1a] text-white sticky top-0 z-50 shadow-lg py-4">
         <nav class="max-w-7xl mx-auto px-4 flex items-center justify-between">
             <div class="flex items-center gap-4 flex-1">
-                <a href="../Home/home.html" class="font-bold hover:opacity-80 transition">
+                <a href="../index/index.php" class="font-bold hover:opacity-80 transition">
                     <img src="../Pics/logo_nenden.png" alt="Logo" class="h-10">
                 </a>
             </div>
@@ -123,7 +123,7 @@
                 <span class="text-sm text-gray-400">Thanh Toán Đơn Hàng</span>
             </div>
             <div class="flex items-center gap-4">
-                <a href="../cart.html" class="text-sm hover:text-red-500 transition flex items-center gap-2">
+                <a href="../cart.php" class="text-sm hover:text-red-500 transition flex items-center gap-2">
                     <i class="fas fa-arrow-left"></i>
                     <span class="hidden sm:inline">Quay lại</span>
                 </a>
@@ -558,7 +558,7 @@
             setTimeout(() => {
                 const orderId = 'ORD' + Math.random().toString(36).substr(2, 9).toUpperCase();
                 alert(`Đặt hàng thành công!\n\nMã đơn hàng: ${orderId}\n\nVui lòng kiểm tra email để theo dõi đơn hàng.`);
-                window.location.href = '../Home/home.html';
+                window.location.href = '../index/index.php';
             }, 2000);
         });
 

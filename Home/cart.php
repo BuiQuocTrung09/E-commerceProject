@@ -333,10 +333,10 @@
             <div class="logo">🏠 Nhà Bếp & Đồ Gia Dụng</div>
             <nav>
                 <ul class="nav-links">
-                    <li><a href="Home/index.html">Trang Chủ</a></li>
+                    <li><a href="index.php">Trang Chủ</a></li>
                     <li><a href="#products">Sản Phẩm</a></li>
                     <li><a href="#contact">Liên Hệ</a></li>
-                    <li><a href="login.html">Tài Khoản</a></li>
+                    <li><a href="login.php">Tài Khoản</a></li>
                 </ul>
             </nav>
         </div>
@@ -351,7 +351,7 @@
                 <div class="cart-empty" id="emptyCart">
                     <div class="cart-empty-icon">🛒</div>
                     <p>Giỏ hàng của bạn trống</p>
-                    <a href="Home/index.html" class="btn-continue-shopping">Tiếp tục mua sắm</a>
+                    <a href="index/index.php" class="btn-continue-shopping">Tiếp tục mua sắm</a>
                 </div>
             </div>
 
@@ -530,7 +530,7 @@
                 return;
             }
             // Redirect to checkout page
-            window.location.href = 'checkout.html';
+            window.location.href = 'checkout.php';
         }
 
         // Initialize cart on page load

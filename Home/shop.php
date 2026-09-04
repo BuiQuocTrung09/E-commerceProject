@@ -235,11 +235,11 @@
         <nav class="max-w-7xl mx-auto px-4 flex items-center justify-between">
             <div class="flex items-center gap-12 flex-1">
                 <!-- LOGO -->
-                <img src="../Pics/logo_nenden.png" alt="Logo" class="logo w-40 cursor-pointer hover:opacity-80 transition" onclick="location.href='home.html'" />
+                <img src="../Pics/logo_nenden.png" alt="Logo" class="logo w-40 cursor-pointer hover:opacity-80 transition" onclick="location.href='index.php'" />
                 
                 <!-- MENU -->
                 <div class="nav-menu hidden md:flex gap-8 items-center">
-                    <a href="home.html" class="nav-link text-white text-sm font-medium">Trang chủ</a>
+                    <a href="index.php" class="nav-link text-white text-sm font-medium">Trang chủ</a>
                     <a href="#" class="nav-link text-white text-sm font-medium">Chợ</a>
                     <a href="#" class="nav-link text-white text-sm font-medium">Danh mục</a>
                     <a href="#" class="nav-link text-white text-sm font-medium">Liên hệ</a>
@@ -277,8 +277,8 @@
 
     <!-- MOBILE MENU -->
     <div class="mobile-menu" id="mobileMenu">
-        <a href="home.html" class="nav-link">Trang chủ</a>
-        <a href="#" class="nav-link">Chợ</a>
+        <a href="index.php" class="nav-link">Trang chủ</a>
+        <a href="shop.php" class="nav-link">Chợ</a>
         <a href="#" class="nav-link">Danh mục</a>
         <a href="#" class="nav-link">Liên hệ</a>
         <a href="#" class="nav-link">Tài khoản</a>
@@ -287,7 +287,7 @@
     <!-- BREADCRUMB -->
     <div class="bg-white border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 py-3 text-sm text-gray-600">
-            <a href="home.html" class="hover:text-red-500">Trang chủ</a>
+            <a href="index.php" class="hover:text-red-500">Trang chủ</a>
             <span class="mx-2">/</span>
             <span>Chợ</span>
         </div>
