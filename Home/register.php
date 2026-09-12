@@ -2,10 +2,8 @@
 require_once 'db.php';
 if(session_status()===PHP_SESSION_NONE) session_start();
 if(isLoggedIn()){ header('Location: index.php'); exit; }
-
 $error=''; $success='';
 $old=['firstName'=>'','lastName'=>'','email'=>'','phone'=>'','address'=>'','city'=>''];
-
 if($_SERVER['REQUEST_METHOD']==='POST'){
     $firstName=trim($_POST['firstName']??'');
     $lastName=trim($_POST['lastName']??'');
@@ -17,150 +15,123 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     $confirm=$_POST['confirmPassword']??'';
     $terms=isset($_POST['terms']);
     $old=['firstName'=>$firstName,'lastName'=>$lastName,'email'=>$email,'phone'=>$phone,'address'=>$address,'city'=>$city];
-
     if($firstName===''||$lastName===''||$email===''||$phone===''||$address===''||$city===''){
-        $error='Vui lòng điền đầy đủ thông tin.';
+        $error='Vui lòng điền đủ các ô có dấu *.';
     } elseif(!filter_var($email,FILTER_VALIDATE_EMAIL)){
-        $error='Email không hợp lệ.';
+        $error='Email chưa đúng định dạng.';
     } elseif(!preg_match('/^[0-9]{9,11}$/',$phone)){
-        $error='Số điện thoại phải có 9-11 chữ số.';
+        $error='Số điện thoại 9–11 số.';
     } elseif(strlen($password)<8 || !preg_match('/[a-z]/',$password) || !preg_match('/[A-Z]/',$password) || !preg_match('/[0-9]/',$password)){
-        $error='Mật khẩu phải ít nhất 8 ký tự, có chữ hoa, chữ thường và số.';
+        $error='Mật khẩu tối thiểu 8 ký tự, có chữ hoa, thường và số.';
     } elseif($password!==$confirm){
-        $error='Mật khẩu xác nhận không trùng khớp.';
+        $error='Xác nhận mật khẩu chưa khớp.';
     } elseif(!$terms){
-        $error='Vui lòng chấp nhận Điều khoản & Điều kiện.';
+        $error='Bạn cần đồng ý điều khoản.';
     } else {
         try{
             $chk=$pdo->prepare("SELECT id FROM users WHERE email=?");
             $chk->execute([$email]);
-            if($chk->fetch()){
-                $error='Email đã được đăng ký, vui lòng dùng email khác.';
-            } else {
+            if($chk->fetch()){ $error='Email đã được đăng ký.'; }
+            else {
                 $hash=password_hash($password,PASSWORD_DEFAULT);
                 $stmt=$pdo->prepare("INSERT INTO users (first_name,last_name,email,phone,address,city,password) VALUES (?,?,?,?,?,?,?)");
                 $stmt->execute([$firstName,$lastName,$email,$phone,$address,$city,$hash]);
-                $success='Đăng ký thành công! Đang chuyển tới trang đăng nhập...';
-                // store names in localStorage via JS redirect; also clear old
+                $success='Tạo tài khoản xong — đang đưa bạn tới đăng nhập...';
                 $old=['firstName'=>'','lastName'=>'','email'=>'','phone'=>'','address'=>'','city'=>''];
-                header('Refresh: 2; URL=login.php?registered=1');
+                header('Refresh: 1.5; URL=login.php?registered=1');
             }
-        }catch(PDOException $e){
-            $error='Lỗi hệ thống: '.$e->getMessage();
-        }
+        }catch(PDOException $e){ $error='Lỗi: '.$e->getMessage(); }
     }
 }
 ?>
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng Ký - Nhà Bếp & Đồ Gia Dụng Online</title>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box;}
-        body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;}
-        .container{display:flex;max-width:1200px;width:100%;gap:40px;align-items:center;}
-        .brand-section{flex:1;color:white;display:none;}
-        @media(min-width:768px){.brand-section{display:block;}}
-        .brand-section h1{font-size:48px;margin-bottom:20px;font-weight:bold;}
-        .brand-section p{font-size:18px;margin-bottom:30px;line-height:1.6;opacity:0.9;}
-        .features{list-style:none;}
-        .features li{font-size:16px;margin-bottom:15px;display:flex;align-items:center;}
-        .features li:before{content:"✓";margin-right:12px;font-size:24px;color:#4ade80;}
-        .register-card{background:white;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,0.3);padding:40px;width:100%;max-width:450px;}
-        .register-card h2{font-size:32px;color:#333;margin-bottom:10px;font-weight:bold;}
-        .register-card p{color:#666;margin-bottom:30px;font-size:14px;}
-        .form-group{margin-bottom:20px;}
-        .form-group label{display:block;margin-bottom:8px;color:#333;font-weight:500;font-size:14px;}
-        .form-group input,.form-group select{width:100%;padding:12px 15px;border:2px solid #e0e0e0;border-radius:6px;font-size:14px;transition:all 0.3s ease;font-family:inherit;}
-        .form-group input:focus,.form-group select:focus{outline:none;border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,0.1);}
-        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:15px;}
-        .password-strength{margin-top:5px;height:4px;background:#e0e0e0;border-radius:2px;overflow:hidden;}
-        .strength-bar{height:100%;width:0%;transition:width 0.3s ease,background-color 0.3s ease;}
-        .checkbox-group{display:flex;align-items:flex-start;gap:10px;margin-bottom:20px;}
-        .checkbox-group input[type="checkbox"]{margin-top:4px;width:18px;height:18px;cursor:pointer;}
-        .checkbox-group label{margin:0;font-size:13px;color:#666;line-height:1.4;cursor:pointer;}
-        .checkbox-group a{color:#667eea;text-decoration:none;}
-        .checkbox-group a:hover{text-decoration:underline;}
-        .btn-register{width:100%;padding:14px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border:none;border-radius:6px;font-size:16px;font-weight:600;cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;}
-        .btn-register:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(102,126,234,0.3);}
-        .btn-register:active{transform:translateY(0);}
-        .divider{display:flex;align-items:center;margin:30px 0;color:#999;}
-        .divider::before,.divider::after{content:"";flex:1;height:1px;background:#e0e0e0;}
-        .divider span{padding:0 10px;font-size:13px;}
-        .social-login{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-        .social-btn{padding:12px;border:2px solid #e0e0e0;border-radius:6px;background:white;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.3s ease;}
-        .social-btn:hover{border-color:#667eea;color:#667eea;}
-        .login-link{text-align:center;margin-top:20px;font-size:14px;color:#666;}
-        .login-link a{color:#667eea;text-decoration:none;font-weight:600;}
-        .login-link a:hover{text-decoration:underline;}
-        .error-message{background:#fee;color:#c00;padding:12px;border-radius:6px;margin-bottom:20px;font-size:13px;}
-        .success-message{background:#efe;color:#060;padding:12px;border-radius:6px;margin-bottom:20px;font-size:13px;}
-        @media(max-width:767px){.register-card{padding:25px;}.register-card h2{font-size:24px;}.form-row{grid-template-columns:1fr;}}
-    </style>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Tạo tài khoản — Chợ Gia Dụng</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,600;9..144,0,700;9..144,1,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<style>
+:root{--paper:#fdf8f1;--paper2:#f5ece0;--line:#eadfd1;--ink:#1c1916;--muted:#7a6e60;--terracotta:#c45b2f;--cream:#fffaf3}
+*{font-family:'Inter',system-ui,sans-serif}
+.serif{font-family:'Fraunces',serif;letter-spacing:-.02em}
+body{background:var(--paper);color:var(--ink)}
+.card{background:white;border:1px solid var(--line);border-radius:24px}
+.input{border:1px solid var(--line);background:var(--cream);border-radius:999px;height:44px;padding:0 16px;outline:none;width:100%;font-size:14px}
+.input:focus{border-color:#d8cabd;box-shadow:0 0 0 4px rgba(232,220,200,.45);background:white}
+.input-area{border:1px solid var(--line);background:var(--cream);border-radius:18px;padding:12px 16px;outline:none;width:100%;font-size:14px}
+.input-area:focus{border-color:#d8cabd;background:white}
+.btn-terra{background:var(--terracotta);color:white;border-radius:999px;transition:.2s}
+.btn-terra:hover{background:#a84522;transform:translateY(-1px)}
+.pill{border:1px solid var(--line);background:var(--cream);border-radius:999px}
+.strength{height:6px;background:var(--paper2);border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+.strength-bar{height:100%;width:0%;transition:.3s;border-radius:999px}
+</style>
 </head>
-<body>
-    <div class="container">
-        <div class="brand-section">
-            <h1>🏠 Nhà Bếp & Đồ Gia Dụng</h1>
-            <p>Khám phá bộ sưu tập đồ gia dụng chất lượng cao với giá tốt nhất thị trường!</p>
-            <ul class="features">
-                <li>Hàng hóa chính hãng, chất lượng tốt</li>
-                <li>Giao hàng nhanh chóng toàn quốc</li>
-                <li>Hỗ trợ khách hàng 24/7</li>
-                <li>Đảm bảo hoàn tiền 100% nếu không hài lòng</li>
-                <li>Ưu đãi độc quyền cho thành viên</li>
-            </ul>
-        </div>
-        <div class="register-card">
-            <h2>Đăng Ký</h2>
-            <p>Tạo tài khoản để bắt đầu mua sắm</p>
-            <?php if($error): ?><div class="error-message"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
-            <?php if($success): ?><div class="success-message"><?php echo htmlspecialchars($success); ?></div><?php endif; ?>
-            <form method="post" id="registerForm" novalidate>
-                <div class="form-row">
-                    <div class="form-group"><label for="firstName">Họ</label><input type="text" id="firstName" name="firstName" placeholder="Nguyễn" required value="<?php echo htmlspecialchars($old['firstName']); ?>"></div>
-                    <div class="form-group"><label for="lastName">Tên</label><input type="text" id="lastName" name="lastName" placeholder="Văn A" required value="<?php echo htmlspecialchars($old['lastName']); ?>"></div>
-                </div>
-                <div class="form-group"><label for="email">Email</label><input type="email" id="email" name="email" placeholder="your.email@example.com" required value="<?php echo htmlspecialchars($old['email']); ?>"></div>
-                <div class="form-group"><label for="phone">Số Điện Thoại</label><input type="tel" id="phone" name="phone" placeholder="0987654321" required value="<?php echo htmlspecialchars($old['phone']); ?>"></div>
-                <div class="form-group"><label for="address">Địa Chỉ</label><input type="text" id="address" name="address" placeholder="123 Đường ABC, Quận 1, TP.HCM" required value="<?php echo htmlspecialchars($old['address']); ?>"></div>
-                <div class="form-group"><label for="city">Thành Phố/Tỉnh</label>
-                    <select id="city" name="city" required>
-                        <option value="">-- Chọn Thành Phố/Tỉnh --</option>
-                        <option value="Hà Nội" <?php echo $old['city']==='Hà Nội'?'selected':''; ?>>Hà Nội</option>
-                        <option value="TP. Hồ Chí Minh" <?php echo $old['city']==='TP. Hồ Chí Minh'?'selected':''; ?>>TP. Hồ Chí Minh</option>
-                        <option value="Đà Nẵng" <?php echo $old['city']==='Đà Nẵng'?'selected':''; ?>>Đà Nẵng</option>
-                        <option value="Hải Phòng" <?php echo $old['city']==='Hải Phòng'?'selected':''; ?>>Hải Phòng</option>
-                        <option value="Cần Thơ" <?php echo $old['city']==='Cần Thơ'?'selected':''; ?>>Cần Thơ</option>
-                        <option value="Khác" <?php echo $old['city']==='Khác'?'selected':''; ?>>Khác</option>
-                    </select>
-                </div>
-                <div class="form-group"><label for="password">Mật Khẩu</label><input type="password" id="password" name="password" placeholder="••••••••" required><div class="password-strength"><div class="strength-bar"></div></div><small style="color:#999;display:block;margin-top:5px;">Tối thiểu 8 ký tự, chứa chữ hoa, chữ thường và số</small></div>
-                <div class="form-group"><label for="confirmPassword">Xác Nhận Mật Khẩu</label><input type="password" id="confirmPassword" name="confirmPassword" placeholder="••••••••" required></div>
-                <div class="checkbox-group"><input type="checkbox" id="terms" name="terms" required><label for="terms">Tôi đồng ý với <a href="term.php" target="_blank">Điều Khoản & Điều Kiện</a> và <a href="term.php" target="_blank">Chính Sách Bảo Mật</a></label></div>
-                <button type="submit" class="btn-register">Đăng Ký Ngay</button>
-            </form>
-            <div class="divider"><span>hoặc</span></div>
-            <div class="social-login"><button type="button" class="social-btn" onclick="alert('Đang phát triển')">📘 Facebook</button><button type="button" class="social-btn" onclick="alert('Đang phát triển')">📧 Google</button></div>
-            <div class="login-link">Đã có tài khoản? <a href="login.php">Đăng Nhập</a></div>
-        </div>
+<body class="min-h-screen flex flex-col">
+<header class="border-b border-[var(--line)] bg-[rgba(253,248,241,.92)] backdrop-blur sticky top-0 z-40">
+  <div class="max-w-[1160px] mx-auto px-4 py-4 flex items-center justify-between">
+    <a href="index.php" class="flex items-center gap-3"><span class="w-10 h-10 rounded-full bg-[#1c1916] text-[#fdf8f1] grid place-items-center font-bold">cg</span><span class="serif text-[18px] font-bold">Chợ Gia Dụng</span></a>
+    <div class="hidden md:flex items-center gap-3 text-sm"><span class="text-[var(--muted)]">Đã có tài khoản?</span><a href="login.php" class="pill px-4 py-2 bg-white font-medium hover:border-[#d8cabd]">Đăng nhập</a></div>
+    <a href="index.php" class="md:hidden text-sm underline">Về cửa hàng</a>
+  </div>
+</header>
+
+<div class="flex-1 grid lg:grid-cols-[.95fr_1.05fr] max-w-[1160px] mx-auto w-full">
+  <div class="hidden lg:flex flex-col justify-center px-10 py-10">
+    <div class="inline-flex pill px-3 py-1.5 text-xs w-fit"><span class="w-2 h-2 bg-[var(--terracotta)] rounded-full animate-pulse"></span> Thành viên mới — giảm 10% đơn đầu</div>
+    <h1 class="serif text-[40px] leading-[.95] mt-5">Tạo tài khoản,<br><span class="italic font-normal">giữ bếp ấm lâu.</span></h1>
+    <p class="text-sm text-[var(--muted)] leading-6 mt-4 max-w-[44ch]">Một tài khoản để lưu món yêu thích, theo dõi đơn và nhận thư nhà mỗi tháng. Tụi mình chỉ gửi khi có chuyện hay.</p>
+    <div class="mt-8 space-y-3 text-sm">
+      <div class="flex gap-3"><span class="w-8 h-8 rounded-full bg-white border border-[var(--line)] grid place-items-center text-xs shrink-0"><i class="fa-solid fa-gift"></i></span><div><div class="font-medium">Quà chào mừng</div><div class="text-xs text-[var(--muted)]">Mã giảm 10% gửi qua email sau khi đăng ký</div></div></div>
+      <div class="flex gap-3"><span class="w-8 h-8 rounded-full bg-white border border-[var(--line)] grid place-items-center text-xs shrink-0"><i class="fa-solid fa-shield-halved"></i></span><div><div class="font-medium">Bảo mật</div><div class="text-xs text-[var(--muted)]">Mật khẩu mã hóa, không lưu thẻ</div></div></div>
+      <div class="flex gap-3"><span class="w-8 h-8 rounded-full bg-white border border-[var(--line)] grid place-items-center text-xs shrink-0"><i class="fa-solid fa-leaf"></i></span><div><div class="font-medium">Bền & sửa được</div><div class="text-xs text-[var(--muted)]">Mua ít, dùng lâu — đó là cách tụi mình làm</div></div></div>
     </div>
-    <script>
-        const passwordInput=document.getElementById('password');
-        const strengthBar=document.querySelector('.strength-bar');
-        if(passwordInput){
-            passwordInput.addEventListener('input',function(){
-                const p=this.value; let s=0;
-                if(p.length>=8) s++; if(/[a-z]/.test(p)) s++; if(/[A-Z]/.test(p)) s++; if(/[0-9]/.test(p)) s++; if(/[^a-zA-Z0-9]/.test(p)) s++;
-                const widths=[0,20,40,60,80,100]; const colors=['#ff4757','#ffa502','#ffd32a','#26de81','#2ed573'];
-                strengthBar.style.width=widths[s]+'%'; strengthBar.style.backgroundColor=colors[s-1]||'#ff4757';
-            });
-        }
-        <?php if($success): ?>
-        setTimeout(()=>{ window.location.href='login.php?registered=1'; },1500);
-        <?php endif; ?>
-    </script>
+    <div class="mt-8 bg-[var(--ink)] text-[#fdf8f1] rounded-2xl p-5">
+      <div class="text-sm leading-6">“Mình thích cách shop gói hàng — giấy kraft, dây đay, không một miếng nilon. Mở ra đã thấy thơm mùi gỗ.”</div><div class="text-xs text-white/60 mt-3">— Quỳnh, Đà Nẵng</div>
+    </div>
+  </div>
+
+  <div class="px-4 py-8 lg:py-10 lg:pl-8">
+    <div class="card p-6 md:p-8">
+      <h2 class="serif text-[26px] leading-none">Tạo tài khoản</h2><p class="text-sm text-[var(--muted)] mt-2">Chỉ mất một phút — và bạn có thể đặt hàng ngay.</p>
+
+      <?php if($error): ?><div class="mt-5 bg-[#fdf0e8] border border-[#f0d0c0] text-[#7a3a20] px-4 py-3 rounded-2xl text-sm"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
+      <?php if($success): ?><div class="mt-5 bg-[#eef3ea] border border-[#cde0c7] text-[#2e5937] px-4 py-3 rounded-2xl text-sm"><?php echo htmlspecialchars($success); ?></div><?php endif; ?>
+
+      <form method="post" class="mt-6 space-y-4">
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="text-xs tracking-[.08em] uppercase text-[var(--muted)]">Họ *</label><input name="firstName" value="<?php echo htmlspecialchars($old['firstName']); ?>" placeholder="Nguyễn" required class="input mt-1"></div>
+          <div><label class="text-xs tracking-[.08em] uppercase text-[var(--muted)]">Tên *</label><input name="lastName" value="<?php echo htmlspecialchars($old['lastName']); ?>" placeholder="Văn A" required class="input mt-1"></div>
+        </div>
+        <div><label class="text-xs tracking-[.08em] uppercase text-[var(--muted)]">Email *</label><input type="email" name="email" value="<?php echo htmlspecialchars($old['email']); ?>" placeholder="ban@email.com" required class="input mt-1"></div>
+        <div><label class="text-xs tracking-[.08em] uppercase text-[var(--muted)]">Điện thoại *</label><input name="phone" value="<?php echo htmlspecialchars($old['phone']); ?>" placeholder="09xxxxxxxx" required class="input mt-1"></div>
+        <div><label class="text-xs tracking-[.08em] uppercase text-[var(--muted)]">Địa chỉ *</label><input name="address" value="<?php echo htmlspecialchars($old['address']); ?>" placeholder="Số nhà, đường, phường..." required class="input mt-1"></div>
+        <div><label class="text-xs tracking-[.08em] uppercase text-[var(--muted)]">Tỉnh / Thành *</label><select name="city" required class="input mt-1"><option value="">Chọn</option><option value="Hà Nội" <?php echo $old['city']==='Hà Nội'?'selected':''; ?>>Hà Nội</option><option value="TP. Hồ Chí Minh" <?php echo $old['city']==='TP. Hồ Chí Minh'?'selected':''; ?>>TP. Hồ Chí Minh</option><option value="Đà Nẵng" <?php echo $old['city']==='Đà Nẵng'?'selected':''; ?>>Đà Nẵng</option><option value="Hải Phòng" <?php echo $old['city']==='Hải Phòng'?'selected':''; ?>>Hải Phòng</option><option value="Cần Thơ" <?php echo $old['city']==='Cần Thơ'?'selected':''; ?>>Cần Thơ</option><option value="Khác" <?php echo $old['city']==='Khác'?'selected':''; ?>>Khác</option></select></div>
+        <div><label class="text-xs tracking-[.08em] uppercase text-[var(--muted)]">Mật khẩu *</label><input id="password" type="password" name="password" placeholder="Tối thiểu 8 ký tự" required class="input mt-1"><div class="strength mt-2"><div class="strength-bar"></div></div><div class="text-xs text-[var(--muted)] mt-1">Gợi ý: 8+ ký tự, có hoa/thường/số</div></div>
+        <div><label class="text-xs tracking-[.08em] uppercase text-[var(--muted)]">Nhập lại mật khẩu *</label><input type="password" name="confirmPassword" placeholder="••••••••" required class="input mt-1"></div>
+        <label class="flex gap-3 text-sm leading-5"><input type="checkbox" name="terms" required class="mt-1 accent-[var(--ink)]"><span>Tôi đồng ý với <a href="term.php" class="underline font-medium">điều khoản</a> và cho phép liên hệ về đơn hàng.</span></label>
+        <button class="btn-terra w-full py-3.5 text-sm font-semibold">Tạo tài khoản — nhận mã 10%</button>
+        <div class="text-center text-sm text-[var(--muted)]">Đã có tài khoản? <a href="login.php" class="font-semibold text-[var(--ink)] underline underline-offset-4">Đăng nhập</a></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+const pw=document.getElementById('password');
+const bar=document.querySelector('.strength-bar');
+if(pw){
+  pw.addEventListener('input',()=>{
+    const p=pw.value; let s=0;
+    if(p.length>=8) s++; if(/[a-z]/.test(p)) s++; if(/[A-Z]/.test(p)) s++; if(/[0-9]/.test(p)) s++; if(/[^A-Za-z0-9]/.test(p)) s++;
+    const w=[0,20,40,60,80,100][s];
+    const c=['#e7ddd0','#f0a66a','#e8b84a','#7fb069','#2e7d32'][s-1]||'#e7ddd0';
+    bar.style.width=w+'%'; bar.style.background=c;
+  });
+}
+</script>
 </body>
 </html>

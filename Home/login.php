@@ -2,18 +2,14 @@
 require_once 'db.php';
 if(session_status()===PHP_SESSION_NONE) session_start();
 if(isLoggedIn()){ header('Location: index.php'); exit; }
-
 $error=''; $success='';
-if(isset($_GET['registered'])) $success='Đăng ký thành công! Vui lòng đăng nhập.';
-if(isset($_GET['checkout']) && !isLoggedIn()) $error='Vui lòng đăng nhập để thanh toán.';
-
+if(isset($_GET['registered'])) $success='Tạo tài khoản xong — mời bạn đăng nhập.';
+if(isset($_GET['checkout']) && !isLoggedIn()) $error='Đăng nhập để tiếp tục thanh toán nhé.';
 if($_SERVER['REQUEST_METHOD']==='POST'){
     $email=trim($_POST['email']??'');
     $password=$_POST['password']??'';
-    $remember=isset($_POST['rememberMe']);
-    if($email===''||$password===''){
-        $error='Vui lòng nhập email và mật khẩu.';
-    } else {
+    if($email===''||$password===''){ $error='Vui lòng nhập email và mật khẩu.'; }
+    else {
         try{
             $stmt=$pdo->prepare("SELECT id, first_name, last_name, email, password FROM users WHERE email=?");
             $stmt->execute([$email]);
@@ -23,126 +19,103 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
                 $_SESSION['first_name']=$user['first_name'];
                 $_SESSION['last_name']=$user['last_name'];
                 $_SESSION['email']=$user['email'];
-                if($remember){
-                    // set a simple feedback via cookie (JS will store)
-                }
-                header('Location: '.($_GET['redirect']??'index.php'));
-                exit;
-            } else {
-                $error='Email hoặc mật khẩu không chính xác.';
-            }
-        }catch(PDOException $e){
-            $error='Lỗi hệ thống: '.$e->getMessage();
-        }
+                header('Location: '.($_GET['redirect']??'index.php')); exit;
+            } else { $error='Email hoặc mật khẩu chưa đúng.'; }
+        }catch(PDOException $e){ $error='Lỗi: '.$e->getMessage(); }
     }
 }
-$rememberedEmail=$_COOKIE['rememberedEmail']??'';
 ?>
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng Nhập - Nhà Bếp & Đồ Gia Dụng Online</title>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box;}
-        body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;}
-        .container{display:flex;max-width:1200px;width:100%;gap:40px;align-items:center;}
-        .brand-section{flex:1;color:white;display:none;}
-        @media(min-width:768px){.brand-section{display:block;}}
-        .brand-section h1{font-size:48px;margin-bottom:20px;font-weight:bold;}
-        .brand-section p{font-size:18px;margin-bottom:30px;line-height:1.6;opacity:0.9;}
-        .benefits{list-style:none;}
-        .benefits li{font-size:16px;margin-bottom:15px;display:flex;align-items:center;}
-        .benefits li:before{content:"★";margin-right:12px;font-size:20px;color:#ffd700;}
-        .login-card{background:white;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,0.3);padding:40px;width:100%;max-width:450px;}
-        .login-header{text-align:center;margin-bottom:30px;}
-        .login-header h2{font-size:32px;color:#333;margin-bottom:10px;font-weight:bold;}
-        .login-header p{color:#666;font-size:14px;}
-        .form-group{margin-bottom:20px;}
-        .form-group label{display:block;margin-bottom:8px;color:#333;font-weight:500;font-size:14px;}
-        .form-group input{width:100%;padding:12px 15px;border:2px solid #e0e0e0;border-radius:6px;font-size:14px;transition:all 0.3s ease;font-family:inherit;}
-        .form-group input:focus{outline:none;border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,0.1);}
-        .remember-forgot{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;font-size:13px;}
-        .remember-forgot input[type="checkbox"]{margin-right:6px;cursor:pointer;}
-        .remember-forgot label{margin:0;cursor:pointer;display:flex;align-items:center;}
-        .forgot-password a{color:#667eea;text-decoration:none;transition:color 0.3s ease;}
-        .forgot-password a:hover{color:#764ba2;}
-        .btn-login{width:100%;padding:14px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border:none;border-radius:6px;font-size:16px;font-weight:600;cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;}
-        .btn-login:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(102,126,234,0.3);}
-        .btn-login:active{transform:translateY(0);}
-        .btn-login:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
-        .divider{display:flex;align-items:center;margin:30px 0;color:#999;}
-        .divider::before,.divider::after{content:"";flex:1;height:1px;background:#e0e0e0;}
-        .divider span{padding:0 10px;font-size:13px;}
-        .social-login{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-        .social-btn{padding:12px;border:2px solid #e0e0e0;border-radius:6px;background:white;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.3s ease;}
-        .social-btn:hover{border-color:#667eea;color:#667eea;}
-        .register-link{text-align:center;margin-top:20px;font-size:14px;color:#666;}
-        .register-link a{color:#667eea;text-decoration:none;font-weight:600;}
-        .register-link a:hover{text-decoration:underline;}
-        .error-message{background:#fee;color:#c00;padding:12px;border-radius:6px;margin-bottom:20px;font-size:13px;}
-        .success-message{background:#efe;color:#060;padding:12px;border-radius:6px;margin-bottom:20px;font-size:13px;}
-        .login-info{background:#f5f5f5;padding:15px;border-radius:6px;margin-bottom:20px;font-size:12px;color:#666;line-height:1.6;}
-        .login-info strong{color:#333;}
-        @media(max-width:767px){.login-card{padding:25px;}.login-header h2{font-size:24px;}.remember-forgot{flex-direction:column;align-items:flex-start;gap:10px;}.login-info{display:none;}}
-    </style>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Đăng nhập — Chợ Gia Dụng</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,600;9..144,0,700;9..144,1,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<style>
+:root{--paper:#fdf8f1;--paper2:#f5ece0;--line:#eadfd1;--ink:#1c1916;--muted:#7a6e60;--terracotta:#c45b2f;--cream:#fffaf3}
+*{font-family:'Inter',system-ui,sans-serif}
+.serif{font-family:'Fraunces',serif;letter-spacing:-.02em}
+body{background:var(--paper);color:var(--ink)}
+.card{background:white;border:1px solid var(--line);border-radius:24px}
+.input{border:1px solid var(--line);background:var(--cream);border-radius:999px;height:44px;padding:0 16px;outline:none;width:100%;font-size:14px}
+.input:focus{border-color:#d8cabd;box-shadow:0 0 0 4px rgba(232,220,200,.45);background:white}
+.btn-terra{background:var(--terracotta);color:white;border-radius:999px;transition:.2s}
+.btn-terra:hover{background:#a84522;transform:translateY(-1px)}
+.pill{border:1px solid var(--line);background:var(--cream);border-radius:999px}
+</style>
 </head>
-<body>
-    <div class="container">
-        <div class="brand-section">
-            <h1>🏠 Nhà Bếp & Đồ Gia Dụng</h1>
-            <p>Chào mừng trở lại! Khám phá những sản phẩm mới và ưu đãi độc quyền cho bạn.</p>
-            <ul class="benefits">
-                <li>Truy cập nhanh chóng vào đơn hàng của bạn</li>
-                <li>Lưu các sản phẩm yêu thích</li>
-                <li>Nhận ưu đãi và khuyến mãi độc quyền</li>
-                <li>Theo dõi vận chuyển hàng hóa của bạn</li>
-                <li>Lịch sử mua hàng và thanh toán</li>
-            </ul>
-        </div>
-        <div class="login-card">
-            <div class="login-header"><h2>Đăng Nhập</h2><p>Quản lý tài khoản và đơn hàng của bạn</p></div>
-            <div class="login-info"><strong>🔒 Thông tin bảo mật:</strong><br>Tài khoản của bạn được bảo vệ bằng mã hóa. Vui lòng không chia sẻ mật khẩu.</div>
-            <?php if($error): ?><div class="error-message"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
-            <?php if($success): ?><div class="success-message"><?php echo htmlspecialchars($success); ?></div><?php endif; ?>
-            <form method="post" id="loginForm">
-                <div class="form-group"><label for="email">Email</label><input type="text" id="email" name="email" placeholder="your.email@example.com" required autofocus value="<?php echo htmlspecialchars($_POST['email']??$rememberedEmail); ?>"></div>
-                <div class="form-group"><label for="password">Mật Khẩu</label><input type="password" id="password" name="password" placeholder="••••••••" required></div>
-                <div class="remember-forgot">
-                    <label><input type="checkbox" id="rememberMe" name="rememberMe"> Nhớ tôi</label>
-                    <div class="forgot-password"><a href="#" onclick="document.getElementById('forgotPasswordModal').style.display='flex'; return false;">Quên mật khẩu?</a></div>
-                </div>
-                <button type="submit" class="btn-login">Đăng Nhập</button>
-            </form>
-            <div class="divider"><span>hoặc</span></div>
-            <div class="social-login"><button type="button" class="social-btn" onclick="alert('Đang phát triển')">📘 Facebook</button><button type="button" class="social-btn" onclick="alert('Đang phát triển')">📧 Google</button></div>
-            <div class="register-link">Chưa có tài khoản? <a href="register.php">Đăng Ký Ngay</a></div>
-            <div style="text-align:center;margin-top:12px"><a href="index.php" style="font-size:13px;color:#666;">← Về trang chủ</a></div>
-        </div>
+<body class="min-h-screen flex flex-col">
+<header class="border-b border-[var(--line)] bg-[rgba(253,248,241,.92)] backdrop-blur sticky top-0 z-40">
+  <div class="max-w-[1160px] mx-auto px-4 py-4 flex items-center justify-between">
+    <a href="index.php" class="flex items-center gap-3"><span class="w-10 h-10 rounded-full bg-[#1c1916] text-[#fdf8f1] grid place-items-center font-bold">cg</span><span class="serif text-[18px] font-bold">Chợ Gia Dụng</span><span class="hidden md:inline text-xs tracking-[.14em] uppercase text-[var(--muted)] ml-2">Est. 2014</span></a>
+    <a href="index.php" class="text-sm hover:underline underline-offset-4">← Về cửa hàng</a>
+  </div>
+</header>
+
+<div class="flex-1 grid lg:grid-cols-[1.05fr_.95fr] max-w-[1160px] mx-auto w-full">
+  <div class="hidden lg:flex flex-col justify-center px-10 py-12">
+    <div class="inline-flex items-center gap-2 pill px-3 py-1.5 text-xs w-fit"><span class="w-2 h-2 bg-[#2e7d32] rounded-full"></span> 2.400+ khách đã tin chọn</div>
+    <h1 class="serif text-[40px] leading-[.95] mt-5">Chào mừng<br>trở lại <span class="italic font-normal">bếp ấm.</span></h1>
+    <p class="text-sm text-[var(--muted)] leading-6 mt-4 max-w-[42ch]">Đăng nhập để xem đơn hàng, lưu món yêu thích và nhận thư nhà mỗi tháng — chỉ một email, không spam.</p>
+    <div class="mt-8 grid gap-3">
+      <div class="card p-4 flex gap-3 items-center"><span class="w-10 h-10 rounded-full bg-[var(--paper2)] border border-[var(--line)] grid place-items-center"><i class="fa-solid fa-box-open text-sm"></i></span><div><div class="text-sm font-medium">Theo dõi đơn dễ dàng</div><div class="text-xs text-[var(--muted)]">Cập nhật giao hàng qua email & SMS</div></div></div>
+      <div class="card p-4 flex gap-3 items-center"><span class="w-10 h-10 rounded-full bg-[var(--paper2)] border border-[var(--line)] grid place-items-center"><i class="fa-regular fa-heart text-sm"></i></span><div><div class="text-sm font-medium">Lưu món yêu thích</div><div class="text-xs text-[var(--muted)]">Tạo danh sách riêng cho căn bếp của bạn</div></div></div>
+      <div class="bg-[var(--ink)] text-[#fdf8f1] rounded-2xl p-5 mt-2">
+        <div class="text-sm font-medium">“Giao nhanh, gói giấy kraft rất xinh. Mình giữ lại làm giấy gói quà.”</div><div class="text-xs text-white/60 mt-2">— Minh Anh, Q.3</div>
+      </div>
     </div>
-    <div id="forgotPasswordModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:1000;">
-        <div style="background:white;padding:30px;border-radius:10px;max-width:400px;width:90%;">
-            <h3 style="margin-bottom:20px;color:#333;">Đặt Lại Mật Khẩu</h3>
-            <p style="color:#666;margin-bottom:20px;font-size:14px;">Nhập email của bạn và chúng tôi sẽ gửi hướng dẫn đặt lại mật khẩu (demo)</p>
-            <input type="email" id="resetEmail" placeholder="your.email@example.com" style="width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:6px;margin-bottom:15px;font-size:14px;">
-            <div style="display:flex;gap:10px;">
-                <button onclick="document.getElementById('forgotPasswordModal').style.display='none'" style="flex:1;padding:12px;border:2px solid #e0e0e0;background:white;border-radius:6px;cursor:pointer;font-weight:500;">Hủy</button>
-                <button onclick="const v=document.getElementById('resetEmail').value.trim(); if(!v){alert('Vui lòng nhập email');return;} alert('Đã gửi hướng dẫn tới '+v+' (demo)'); document.getElementById('forgotPasswordModal').style.display='none';" style="flex:1;padding:12px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border:none;border-radius:6px;cursor:pointer;font-weight:600;">Gửi</button>
-            </div>
+  </div>
+
+  <div class="px-4 py-8 lg:py-12 lg:pl-8 flex flex-col justify-center">
+    <div class="card p-6 md:p-8">
+      <div class="flex items-start justify-between gap-4">
+        <div><h2 class="serif text-[26px] leading-none">Đăng nhập</h2><p class="text-sm text-[var(--muted)] mt-2">Dùng email bạn đã đăng ký.</p></div>
+        <span class="hidden md:inline-flex pill px-3 py-1.5 text-xs"><i class="fa-solid fa-lock text-[10px] mr-1"></i> Bảo mật</span>
+      </div>
+
+      <?php if($error): ?><div class="mt-5 bg-[#fdf0e8] border border-[#f0d0c0] text-[#7a3a20] px-4 py-3 rounded-2xl text-sm"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
+      <?php if($success): ?><div class="mt-5 bg-[#eef3ea] border border-[#cde0c7] text-[#2e5937] px-4 py-3 rounded-2xl text-sm"><?php echo htmlspecialchars($success); ?></div><?php endif; ?>
+
+      <form method="post" id="loginForm" class="mt-6 space-y-4">
+        <div><label class="text-xs tracking-[.08em] uppercase text-[var(--muted)]">Email</label><input id="email" name="email" type="text" placeholder="ban@email.com" required autofocus value="<?php echo htmlspecialchars($_POST['email']??''); ?>" class="input mt-1"></div>
+        <div><div class="flex items-center justify-between"><label class="text-xs tracking-[.08em] uppercase text-[var(--muted)]">Mật khẩu</label><button type="button" onclick="const i=document.getElementById('password'); i.type=i.type==='password'?'text':'password'; this.textContent=i.type==='password'?'Hiện':'Ẩn'" class="text-xs underline underline-offset-4">Hiện</button></div><input id="password" name="password" type="password" placeholder="••••••••" required class="input mt-1"></div>
+        <div class="flex items-center justify-between text-sm">
+          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="rememberMe" name="rememberMe" class="accent-[var(--ink)]"> <span class="text-[var(--muted)]">Ghi nhớ email</span></label>
+          <button type="button" onclick="document.getElementById('forgot').classList.remove('hidden'); document.getElementById('forgot').classList.add('flex')" class="underline underline-offset-4">Quên mật khẩu?</button>
         </div>
+        <button class="btn-terra w-full py-3.5 text-sm font-semibold mt-2">Đăng nhập</button>
+        <div class="text-center text-sm text-[var(--muted)]">Chưa có tài khoản? <a href="register.php" class="font-semibold text-[var(--ink)] underline underline-offset-4">Tạo tài khoản</a></div>
+      </form>
+
+      <div class="flex items-center gap-3 my-6"><span class="h-px bg-[var(--line)] flex-1"></span><span class="text-xs tracking-[.12em] uppercase text-[var(--muted)]">Hoặc</span><span class="h-px bg-[var(--line)] flex-1"></span></div>
+      <div class="grid grid-cols-2 gap-3">
+        <button type="button" onclick="alert('Sắp ra mắt')" class="pill h-[44px] flex items-center justify-center gap-2 text-sm font-medium bg-white hover:border-[#d8cabd]"><i class="fa-brands fa-google"></i> Google</button>
+        <button type="button" onclick="alert('Sắp ra mắt')" class="pill h-[44px] flex items-center justify-center gap-2 text-sm font-medium bg-white hover:border-[#d8cabd]"><i class="fa-brands fa-facebook"></i> Facebook</button>
+      </div>
+      <div class="text-xs text-center text-[var(--muted)] mt-4">Bằng việc tiếp tục, bạn đồng ý với <a href="term.php" class="underline">điều khoản</a>.</div>
     </div>
-    <script>
-        // remember email via localStorage
-        const emailInput=document.getElementById('email');
-        const rememberChk=document.getElementById('rememberMe');
-        const saved=localStorage.getItem('rememberedEmail');
-        if(saved && !emailInput.value){ emailInput.value=saved; rememberChk.checked=true; }
-        document.getElementById('loginForm').addEventListener('submit',function(){
-            if(rememberChk.checked) localStorage.setItem('rememberedEmail',emailInput.value.trim());
-            else localStorage.removeItem('rememberedEmail');
-        });
-        document.getElementById('forgotPasswordModal').addEventListener('click',function(e){ if(e.target===this) this.style.display='none'; });
-    </script>
+    <div class="text-center text-xs text-[var(--muted)] mt-4">© 2024 Chợ Gia Dụng · Gốm — Gang — Gỗ</div>
+  </div>
+</div>
+
+<div id="forgot" class="hidden fixed inset-0 bg-[rgba(28,25,22,.45)] backdrop-blur-sm z-50 items-center justify-center p-4">
+  <div class="bg-white border border-[var(--line)] rounded-[24px] max-w-[420px] w-full p-6">
+    <h3 class="serif text-xl">Đặt lại mật khẩu</h3><p class="text-sm text-[var(--muted)] mt-2">Nhập email, tụi mình sẽ gửi hướng dẫn (bản demo).</p>
+    <input id="resetEmail" type="email" placeholder="ban@email.com" class="input mt-4">
+    <div class="flex gap-3 mt-4"><button onclick="document.getElementById('forgot').classList.add('hidden')" class="flex-1 pill h-11 text-sm font-medium bg-white">Hủy</button><button onclick="const v=document.getElementById('resetEmail').value.trim(); if(!v){alert('Nhập email nhé');return;} alert('Đã gửi tới '+v+' (demo)'); document.getElementById('forgot').classList.add('hidden')" class="flex-1 btn-terra h-11 text-sm font-semibold">Gửi</button></div>
+  </div>
+</div>
+
+<script>
+const emailInput=document.getElementById('email');
+const rememberChk=document.getElementById('rememberMe');
+const saved=localStorage.getItem('rememberedEmail');
+if(saved && !emailInput.value){ emailInput.value=saved; rememberChk.checked=true; }
+document.getElementById('loginForm').addEventListener('submit',()=>{ if(rememberChk.checked) localStorage.setItem('rememberedEmail',emailInput.value.trim()); else localStorage.removeItem('rememberedEmail'); });
+document.getElementById('forgot').addEventListener('click',e=>{ if(e.target.id==='forgot') e.currentTarget.classList.add('hidden'); });
+</script>
 </body>
 </html>
