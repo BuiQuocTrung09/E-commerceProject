@@ -4,6 +4,7 @@ if(session_status()===PHP_SESSION_NONE) session_start();
 if(isLoggedIn()){ header('Location: index.php'); exit; }
 $error=''; $success='';
 if(isset($_GET['registered'])) $success='Tạo tài khoản xong — mời bạn đăng nhập.';
+if(isset($_GET['reset'])) $success='Đặt lại mật khẩu thành công — đăng nhập bằng mật khẩu mới nhé.';
 if(isset($_GET['checkout']) && !isLoggedIn()) $error='Đăng nhập để tiếp tục thanh toán nhé.';
 if($_SERVER['REQUEST_METHOD']==='POST'){
     $email=trim($_POST['email']??'');
@@ -85,7 +86,7 @@ body{background:var(--paper);color:var(--ink)}
         <div><div class="flex items-center justify-between"><label class="text-xs tracking-[.08em] uppercase text-[var(--muted)]">Mật khẩu</label><button type="button" onclick="const i=document.getElementById('password'); i.type=i.type==='password'?'text':'password'; this.textContent=i.type==='password'?'Hiện':'Ẩn'" class="text-xs underline underline-offset-4">Hiện</button></div><input id="password" name="password" type="password" placeholder="••••••••" required class="input mt-1"></div>
         <div class="flex items-center justify-between text-sm">
           <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="rememberMe" name="rememberMe" class="accent-[var(--ink)]"> <span class="text-[var(--muted)]">Ghi nhớ email</span></label>
-          <button type="button" onclick="document.getElementById('forgot').classList.remove('hidden'); document.getElementById('forgot').classList.add('flex')" class="underline underline-offset-4">Quên mật khẩu?</button>
+          <a href="forgot-password.php" class="underline underline-offset-4">Quên mật khẩu?</a>
         </div>
         <button class="btn-terra w-full py-3.5 text-sm font-semibold mt-2">Đăng nhập</button>
         <div class="text-center text-sm text-[var(--muted)]">Chưa có tài khoản? <a href="register.php" class="font-semibold text-[var(--ink)] underline underline-offset-4">Tạo tài khoản</a></div>
@@ -102,21 +103,12 @@ body{background:var(--paper);color:var(--ink)}
   </div>
 </div>
 
-<div id="forgot" class="hidden fixed inset-0 bg-[rgba(28,25,22,.45)] backdrop-blur-sm z-50 items-center justify-center p-4">
-  <div class="bg-white border border-[var(--line)] rounded-[24px] max-w-[420px] w-full p-6">
-    <h3 class="serif text-xl">Đặt lại mật khẩu</h3><p class="text-sm text-[var(--muted)] mt-2">Nhập email, tụi mình sẽ gửi hướng dẫn (bản demo).</p>
-    <input id="resetEmail" type="email" placeholder="ban@email.com" class="input mt-4">
-    <div class="flex gap-3 mt-4"><button onclick="document.getElementById('forgot').classList.add('hidden')" class="flex-1 pill h-11 text-sm font-medium bg-white">Hủy</button><button onclick="const v=document.getElementById('resetEmail').value.trim(); if(!v){alert('Nhập email nhé');return;} alert('Đã gửi tới '+v+' (demo)'); document.getElementById('forgot').classList.add('hidden')" class="flex-1 btn-terra h-11 text-sm font-semibold">Gửi</button></div>
-  </div>
-</div>
-
 <script>
 const emailInput=document.getElementById('email');
 const rememberChk=document.getElementById('rememberMe');
 const saved=localStorage.getItem('rememberedEmail');
 if(saved && !emailInput.value){ emailInput.value=saved; rememberChk.checked=true; }
 document.getElementById('loginForm').addEventListener('submit',()=>{ if(rememberChk.checked) localStorage.setItem('rememberedEmail',emailInput.value.trim()); else localStorage.removeItem('rememberedEmail'); });
-document.getElementById('forgot').addEventListener('click',e=>{ if(e.target.id==='forgot') e.currentTarget.classList.add('hidden'); });
 </script>
 </body>
 </html>

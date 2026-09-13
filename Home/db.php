@@ -215,15 +215,35 @@ if(!function_exists('csrfCheck')){
 }
 
 /* ---------- Gửi email (Resend HTTP API, không cần Composer) ---------- */
+if(!function_exists('resendApiKey')){
+    /** Đọc API key: ưu tiên file config.local.php (localhost), sau đó đến biến môi trường (production). */
+    function resendApiKey(){
+        static $cached = null;
+        if($cached !== null) return $cached;
+        $cached = '';
+        $cfgFile = __DIR__.'/config.local.php';
+        if(is_file($cfgFile)){
+            require $cfgFile;
+            if(defined('RESEND_API_KEY_LOCAL') && RESEND_API_KEY_LOCAL !== ''){
+                $cached = RESEND_API_KEY_LOCAL;
+            }
+        }
+        if($cached === '' && getenv('RESEND_API_KEY')){
+            $cached = getenv('RESEND_API_KEY');
+        }
+        return $cached;
+    }
+}
 if(!function_exists('sendEmail')){
     /**
-     * Gửi email qua Resend. Cần biến môi trường RESEND_API_KEY.
+     * Gửi email qua Resend. Key lấy từ Home/config.local.php (localhost)
+     * hoặc biến môi trường RESEND_API_KEY (production).
      * Lưu ý: gói miễn phí của Resend chỉ gửi được tới email chủ tài khoản
      * cho tới khi bạn xác thực riêng domain gửi (xem resend.com/domains).
      * Trả về true nếu gửi thành công, false nếu thất bại / chưa có API key.
      */
     function sendEmail($toEmail, $subject, $htmlBody){
-        $apiKey = getenv('RESEND_API_KEY');
+        $apiKey = resendApiKey();
         if(!$apiKey){
             // Chưa cấu hình API key — ghi ra file log để thử locally
             @file_put_contents(__DIR__.'/otp_dev.log', date('Y-m-d H:i:s')." | TO: $toEmail | SUBJECT: $subject\n", FILE_APPEND);

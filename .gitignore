@@ -1,0 +1,10 @@
+# Secrets & file local — KHÔNG push lên GitHub
+Home/config.local.php
+Home/otp_dev.log
+
+# System / editor junk
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
