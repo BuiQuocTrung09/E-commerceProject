@@ -109,14 +109,31 @@ body{background:var(--paper);color:var(--ink)}
         </div>
       </div>
       <div class="flex items-center gap-2 ml-auto md:ml-4">
-        <div class="hidden md:flex items-center gap-2 pill h-[42px] px-4 text-sm"><i class="fa-regular fa-user"></i><span class="max-w-[110px] truncate"><?php echo $displayName; ?></span></div>
-        <a href="cart.php" class="relative pill h-[42px] px-4 flex items-center gap-2 text-sm font-medium"><i class="fa-solid fa-bag-shopping"></i><span class="hidden sm:inline">Giỏ</span><span class="bg-[var(--terracotta)] text-white text-[11px] font-bold min-w-[20px] h-5 grid place-items-center rounded-full px-1.5"><?php echo $cartCount; ?></span></a>
+        <div class="relative group">
+        <button class="hidden md:flex items-center gap-2.5 pill h-[42px] px-4 text-sm">
+          <span class="w-7 h-7 rounded-full bg-[var(--paper2)] border border-[var(--line)] grid place-items-center text-xs"><i class="fa-regular fa-user"></i></span>
+          <span class="max-w-[110px] truncate"><?php echo $displayName; ?></span>
+          <i class="fa-solid fa-chevron-down text-[10px] opacity-40"></i>
+        </button>
+        <div class="hidden group-hover:block absolute right-0 top-[46px] bg-white border border-[var(--line)] rounded-2xl shadow-xl w-56 overflow-hidden z-50">
+          <?php if(isLoggedIn()): ?>
+            <a href="profile.php" class="flex items-center gap-2.5 px-4 py-3 text-sm hover:bg-[var(--paper)]"><i class="fa-regular fa-user text-xs opacity-50"></i>Tài khoản của tôi</a>
+            <?php if(isAdmin()): ?><a href="admin.php" class="flex items-center gap-2.5 px-4 py-3 text-sm font-medium hover:bg-[var(--paper)]"><i class="fa-solid fa-shield-halved text-xs"></i>Trang quản trị</a><?php endif; ?>
+            <a href="logout.php" class="block px-4 py-3 text-sm text-[var(--terracotta)] hover:bg-[var(--paper)] border-t border-[var(--line)]">Đăng xuất</a>
+          <?php else: ?>
+            <a href="login.php" class="block px-4 py-3 text-sm hover:bg-[var(--paper)]">Đăng nhập</a>
+            <a href="register.php" class="block px-4 py-3 text-sm hover:bg-[var(--paper)]">Tạo tài khoản</a>
+          <?php endif; ?>
+        </div>
+      </div>
+      <a href="cart.php" class="relative pill h-[42px] px-4 flex items-center gap-2 text-sm font-medium"><i class="fa-solid fa-bag-shopping"></i><span class="hidden sm:inline">Giỏ</span><span class="bg-[var(--terracotta)] text-white text-[11px] font-bold min-w-[20px] h-5 grid place-items-center rounded-full px-1.5"><?php echo $cartCount; ?></span></a>
         <button id="hamburger" class="lg:hidden pill w-[42px] h-[42px] grid place-items-center"><i class="fa-solid fa-bars"></i></button>
       </div>
     </div>
     <div id="mobileMenu" class="mobile-menu lg:hidden"><div class="py-3 space-y-2">
       <div class="flex gap-2"><div class="pill flex-1 flex items-center px-3 h-10 gap-2"><i class="fa-solid fa-magnifying-glass text-sm opacity-50"></i><input id="mSearch" value="<?php echo htmlspecialchars($search); ?>" placeholder="Tìm..." class="flex-1 bg-transparent outline-none text-sm"></div><button onclick="const v=document.getElementById('mSearch').value.trim(); if(v) location.href='shop.php?search='+encodeURIComponent(v)" class="btn-terra px-5 h-10 text-sm font-semibold">Tìm</button></div>
       <a href="index.php" class="block px-3 py-3 bg-white border border-[var(--line)] rounded-xl text-sm">Trang chủ</a><a href="shop.php" class="block px-3 py-3 bg-[var(--ink)] text-white rounded-xl text-sm">Chợ</a>
+      <?php if(isLoggedIn()): ?><div class="grid grid-cols-2 gap-2"><a href="profile.php" class="block px-3 py-3 bg-white border border-[var(--line)] rounded-xl text-sm">Tài khoản</a><a href="logout.php" class="block px-3 py-3 bg-white border border-[var(--line)] rounded-xl text-sm text-[var(--terracotta)]">Đăng xuất</a></div><?php else: ?><div class="grid grid-cols-2 gap-2"><a href="login.php" class="block px-3 py-3 bg-white border border-[var(--line)] rounded-xl text-sm">Đăng nhập</a><a href="register.php" class="block px-3 py-3 bg-[var(--terracotta)] text-white rounded-xl text-sm">Đăng ký</a></div><?php endif; ?>
     </div></div>
   </div>
 </header>

@@ -29,7 +29,22 @@ body{background:var(--paper);color:var(--ink)}
     <a href="index.php" class="flex items-center gap-3 shrink-0"><span class="w-10 h-10 rounded-full bg-[#1c1916] text-[#fdf8f1] grid place-items-center font-bold">cg</span><span class="serif text-[18px] font-bold">Chợ Gia Dụng</span></a>
     <nav class="hidden md:flex items-center gap-5 text-sm ml-6"><a href="index.php" class="hover:text-black/60">Trang chủ</a><a href="shop.php" class="hover:text-black/60">Chợ</a><a href="about.php" class="hover:text-black/60">Câu chuyện</a><a href="term.php" class="font-semibold underline underline-offset-8">Điều khoản</a></nav>
     <div class="ml-auto flex items-center gap-2">
-      <span class="hidden md:inline-flex items-center gap-2 pill h-10 px-4 text-sm"><i class="fa-regular fa-user"></i><?php echo $displayName; ?></span>
+    <div class="relative group">
+      <button class="hidden md:inline-flex items-center gap-2 pill h-10 px-4 text-sm">
+        <i class="fa-regular fa-user"></i><span class="max-w-[110px] truncate"><?php echo $displayName; ?></span>
+        <i class="fa-solid fa-chevron-down text-[10px] opacity-40"></i>
+      </button>
+      <div class="hidden group-hover:block absolute right-0 top-[44px] bg-white border border-[var(--line)] rounded-2xl shadow-xl w-56 overflow-hidden z-50">
+        <?php if(isLoggedIn()): ?>
+          <a href="profile.php" class="flex items-center gap-2.5 px-4 py-3 text-sm hover:bg-[var(--paper)]"><i class="fa-regular fa-user text-xs opacity-50"></i>Tài khoản của tôi</a>
+          <?php if(isAdmin()): ?><a href="admin.php" class="flex items-center gap-2.5 px-4 py-3 text-sm font-medium hover:bg-[var(--paper)]"><i class="fa-solid fa-shield-halved text-xs"></i>Trang quản trị</a><?php endif; ?>
+          <a href="logout.php" class="block px-4 py-3 text-sm text-[var(--terracotta)] hover:bg-[var(--paper)] border-t border-[var(--line)]">Đăng xuất</a>
+        <?php else: ?>
+          <a href="login.php" class="block px-4 py-3 text-sm hover:bg-[var(--paper)]">Đăng nhập</a>
+          <a href="register.php" class="block px-4 py-3 text-sm hover:bg-[var(--paper)]">Tạo tài khoản</a>
+        <?php endif; ?>
+      </div>
+    </div>
       <a href="cart.php" class="pill h-10 px-4 flex items-center gap-2 text-sm font-medium"><i class="fa-solid fa-bag-shopping"></i>Giỏ<span class="bg-[var(--terracotta)] text-white text-xs min-w-[20px] h-5 grid place-items-center rounded-full px-1.5"><?php echo $cartCount; ?></span></a>
     </div>
   </div>

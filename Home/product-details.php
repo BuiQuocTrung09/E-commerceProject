@@ -70,7 +70,23 @@ body{background:var(--paper);color:var(--ink)}
       <div class="pill flex items-center w-full px-1 h-[40px] gap-1"><i class="fa-solid fa-magnifying-glass text-[#9a8e81] ml-3 text-sm"></i><input id="headerSearchInput" placeholder="Tìm..." class="flex-1 bg-transparent outline-none text-[13px] px-2"><button id="headerSearchBtn" class="btn-terra px-4 h-[32px] text-xs font-semibold">Tìm</button></div>
     </div>
     <div class="flex items-center gap-2 ml-auto md:ml-4">
-      <span class="hidden md:inline-flex items-center gap-2 pill h-[40px] px-4 text-sm"><i class="fa-regular fa-user"></i><?php echo $displayName; ?></span>
+      <div class="relative group">
+        <button class="hidden md:flex items-center gap-2.5 pill h-[40px] px-4 text-sm">
+          <span class="w-7 h-7 rounded-full bg-[var(--paper2)] border border-[var(--line)] grid place-items-center text-xs"><i class="fa-regular fa-user"></i></span>
+          <span class="max-w-[110px] truncate"><?php echo $displayName; ?></span>
+          <i class="fa-solid fa-chevron-down text-[10px] opacity-40"></i>
+        </button>
+        <div class="hidden group-hover:block absolute right-0 top-[44px] bg-white border border-[var(--line)] rounded-2xl shadow-xl w-56 overflow-hidden z-50">
+          <?php if(isLoggedIn()): ?>
+            <a href="profile.php" class="flex items-center gap-2.5 px-4 py-3 text-sm hover:bg-[var(--paper)]"><i class="fa-regular fa-user text-xs opacity-50"></i>Tài khoản của tôi</a>
+            <?php if(isAdmin()): ?><a href="admin.php" class="flex items-center gap-2.5 px-4 py-3 text-sm font-medium hover:bg-[var(--paper)]"><i class="fa-solid fa-shield-halved text-xs"></i>Trang quản trị</a><?php endif; ?>
+            <a href="logout.php" class="block px-4 py-3 text-sm text-[var(--terracotta)] hover:bg-[var(--paper)] border-t border-[var(--line)]">Đăng xuất</a>
+          <?php else: ?>
+            <a href="login.php" class="block px-4 py-3 text-sm hover:bg-[var(--paper)]">Đăng nhập</a>
+            <a href="register.php" class="block px-4 py-3 text-sm hover:bg-[var(--paper)]">Tạo tài khoản</a>
+          <?php endif; ?>
+        </div>
+      </div>
       <a href="cart.php" class="relative pill h-[40px] px-4 flex items-center gap-2 text-sm font-medium"><i class="fa-solid fa-bag-shopping"></i><span class="hidden sm:inline">Giỏ</span><span class="bg-[var(--terracotta)] text-white text-[11px] font-bold min-w-[20px] h-5 grid place-items-center rounded-full px-1.5"><?php echo $cartCount; ?></span></a>
       <a href="shop.php" class="hidden md:inline-flex lg:hidden pill w-10 h-10 grid place-items-center"><i class="fa-solid fa-bars"></i></a>
     </div>

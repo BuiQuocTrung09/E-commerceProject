@@ -104,8 +104,10 @@ body{background:var(--paper);color:var(--ink)}
             <div class="hidden group-hover:block absolute right-0 top-[46px] bg-white border border-[var(--line)] rounded-2xl shadow-xl w-56 overflow-hidden">
               <?php if(isLoggedIn()): ?>
                 <div class="px-4 py-3 bg-[var(--paper)] border-b border-[var(--line)]"><div class="text-sm font-semibold truncate"><?php echo $displayName; ?></div><div class="text-xs text-[var(--muted)] truncate"><?php echo htmlspecialchars($_SESSION['email']??''); ?></div></div>
+                <a href="profile.php" class="flex items-center gap-2.5 px-4 py-3 text-sm hover:bg-[var(--paper)]"><i class="fa-regular fa-user text-xs opacity-50"></i>Tài khoản của tôi</a>
+                <?php if(isAdmin()): ?><a href="admin.php" class="flex items-center gap-2.5 px-4 py-3 text-sm font-medium hover:bg-[var(--paper)]"><i class="fa-solid fa-shield-halved text-xs"></i>Trang quản trị</a><?php endif; ?>
                 <a href="cart.php" class="flex items-center justify-between px-4 py-3 text-sm hover:bg-[var(--paper)]">Giỏ hàng <span class="bg-[var(--ink)] text-white text-xs px-2 py-0.5 rounded-full"><?php echo $cartCount; ?></span></a>
-                <a href="logout.php" class="block px-4 py-3 text-sm text-[var(--terracotta)] hover:bg-[var(--paper)]">Đăng xuất</a>
+                <a href="logout.php" class="block px-4 py-3 text-sm text-[var(--terracotta)] hover:bg-[var(--paper)] border-t border-[var(--line)]">Đăng xuất</a>
               <?php else: ?>
                 <a href="login.php" class="block px-4 py-3 text-sm hover:bg-[var(--paper)]">Đăng nhập</a>
                 <a href="register.php" class="block px-4 py-3 text-sm hover:bg-[var(--paper)]">Tạo tài khoản</a>
@@ -136,7 +138,7 @@ body{background:var(--paper);color:var(--ink)}
           <a href="shop.php?cat=don-dep" class="bg-white border border-[var(--line)] rounded-xl px-3 py-3 text-sm">Dọn dẹp</a>
           <a href="shop.php?cat=chieu-sang" class="bg-white border border-[var(--line)] rounded-xl px-3 py-3 text-sm">Ánh sáng</a>
         </div>
-        <div class="flex gap-2 pt-2"><?php if(isLoggedIn()): ?><a href="logout.php" class="flex-1 text-center btn-ghost py-3 text-sm">Đăng xuất</a><?php else: ?><a href="login.php" class="flex-1 text-center btn-ghost py-3 text-sm">Đăng nhập</a><a href="register.php" class="flex-1 text-center btn-terra py-3 text-sm">Đăng ký</a><?php endif; ?></div>
+        <div class="flex gap-2 pt-2"><?php if(isLoggedIn()): ?><a href="profile.php" class="flex-1 text-center btn-ghost py-3 text-sm">Tài khoản</a><?php if(isAdmin()): ?><a href="admin.php" class="flex-1 text-center btn-ghost py-3 text-sm">Quản trị</a><?php endif; ?><a href="logout.php" class="flex-1 text-center btn-ghost py-3 text-sm">Đăng xuất</a><?php else: ?><a href="login.php" class="flex-1 text-center btn-ghost py-3 text-sm">Đăng nhập</a><a href="register.php" class="flex-1 text-center btn-terra py-3 text-sm">Đăng ký</a><?php endif; ?></div>
       </div>
     </div>
   </div>

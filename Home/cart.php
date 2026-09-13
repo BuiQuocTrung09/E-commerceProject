@@ -99,7 +99,22 @@ body{background:var(--paper);color:var(--ink)}
   <div class="max-w-[1280px] mx-auto px-4 py-4 flex items-center gap-6">
     <a href="index.php" class="flex items-center gap-3 shrink-0"><span class="w-10 h-10 rounded-full bg-[#1c1916] text-[#fdf8f1] grid place-items-center text-[15px] font-bold">cg</span><span class="serif text-[20px] font-bold">Chợ Gia Dụng</span></a>
     <nav class="hidden md:flex items-center gap-6 text-sm ml-6"><a href="index.php" class="hover:text-black/60">Trang chủ</a><a href="shop.php" class="hover:text-black/60">Chợ</a><a href="about.php" class="hover:text-black/60">Câu chuyện</a></nav>
-    <div class="hidden md:flex items-center gap-2 ml-auto pill h-[40px] px-4 text-sm"><i class="fa-regular fa-user"></i><span><?php echo $displayName; ?></span><?php if(isLoggedIn()): ?><a href="logout.php" class="text-[var(--terracotta)] ml-2 font-medium hover:underline">Đăng xuất</a><?php else: ?><a href="login.php" class="ml-2 underline underline-offset-4">Đăng nhập</a><?php endif; ?></div>
+    <div class="relative group">
+      <button class="hidden md:flex items-center gap-2.5 pill h-[40px] px-4 text-sm">
+        <i class="fa-regular fa-user"></i><span class="max-w-[110px] truncate"><?php echo $displayName; ?></span>
+        <i class="fa-solid fa-chevron-down text-[10px] opacity-40"></i>
+      </button>
+      <div class="hidden group-hover:block absolute right-0 top-[44px] bg-white border border-[var(--line)] rounded-2xl shadow-xl w-56 overflow-hidden z-50">
+        <?php if(isLoggedIn()): ?>
+          <a href="profile.php" class="flex items-center gap-2.5 px-4 py-3 text-sm hover:bg-[var(--paper)]"><i class="fa-regular fa-user text-xs opacity-50"></i>Tài khoản của tôi</a>
+          <?php if(isAdmin()): ?><a href="admin.php" class="flex items-center gap-2.5 px-4 py-3 text-sm font-medium hover:bg-[var(--paper)]"><i class="fa-solid fa-shield-halved text-xs"></i>Trang quản trị</a><?php endif; ?>
+          <a href="logout.php" class="block px-4 py-3 text-sm text-[var(--terracotta)] hover:bg-[var(--paper)] border-t border-[var(--line)]">Đăng xuất</a>
+        <?php else: ?>
+          <a href="login.php" class="block px-4 py-3 text-sm hover:bg-[var(--paper)]">Đăng nhập</a>
+          <a href="register.php" class="block px-4 py-3 text-sm hover:bg-[var(--paper)]">Tạo tài khoản</a>
+        <?php endif; ?>
+      </div>
+    </div>
     <a href="cart.php" class="relative pill h-[40px] px-4 flex items-center gap-2 text-sm font-medium ml-auto md:ml-2 bg-[var(--ink)] text-white border-[var(--ink)]"><i class="fa-solid fa-bag-shopping"></i><span>Giỏ</span><span class="bg-white text-[var(--ink)] text-[11px] font-bold min-w-[20px] h-5 grid place-items-center rounded-full px-1.5"><?php echo $cartCount; ?></span></a>
   </div>
 </header>

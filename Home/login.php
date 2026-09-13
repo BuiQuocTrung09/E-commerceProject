@@ -11,7 +11,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     if($email===''||$password===''){ $error='Vui lòng nhập email và mật khẩu.'; }
     else {
         try{
-            $stmt=$pdo->prepare("SELECT id, first_name, last_name, email, password FROM users WHERE email=?");
+            $stmt=$pdo->prepare("SELECT id, first_name, last_name, email, password, role FROM users WHERE email=?");
             $stmt->execute([$email]);
             $user=$stmt->fetch(PDO::FETCH_ASSOC);
             if($user && password_verify($password,$user['password'])){
@@ -19,6 +19,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
                 $_SESSION['first_name']=$user['first_name'];
                 $_SESSION['last_name']=$user['last_name'];
                 $_SESSION['email']=$user['email'];
+                $_SESSION['role']=$user['role'] ?? 'user';
                 header('Location: '.($_GET['redirect']??'index.php')); exit;
             } else { $error='Email hoặc mật khẩu chưa đúng.'; }
         }catch(PDOException $e){ $error='Lỗi: '.$e->getMessage(); }

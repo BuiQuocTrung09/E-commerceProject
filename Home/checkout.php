@@ -167,7 +167,22 @@ body{background:var(--paper);color:var(--ink)}
   <div class="max-w-[1280px] mx-auto px-4 py-4 flex items-center gap-4">
     <a href="index.php" class="flex items-center gap-3 shrink-0"><span class="w-10 h-10 rounded-full bg-[#1c1916] text-[#fdf8f1] grid place-items-center text-[15px] font-bold">cg</span><span class="serif text-[18px] font-bold">Chợ Gia Dụng</span></a>
     <div class="hidden md:flex items-center gap-2 text-xs ml-6"><span class="w-7 h-7 rounded-full bg-[#eef3ea] border border-[#cde0c7] grid place-items-center text-[#2e5937]"><i class="fa-solid fa-check text-[10px]"></i></span> Giỏ hàng <span class="w-8 h-px bg-[var(--line)]"></span> <span class="w-7 h-7 rounded-full bg-[var(--ink)] text-white grid place-items-center text-xs">2</span> <span class="font-semibold">Thanh toán</span> <span class="w-8 h-px bg-[var(--line)]"></span> <span class="w-7 h-7 rounded-full bg-white border border-[var(--line)] grid place-items-center text-xs">3</span> <span class="text-[var(--muted)]">Hoàn tất</span></div>
-    <div class="ml-auto flex items-center gap-2"><span class="hidden md:inline text-sm text-[var(--muted)]"><?php echo $displayName; ?></span><a href="cart.php" class="pill h-10 px-4 flex items-center gap-2 text-sm"><i class="fa-solid fa-arrow-left text-xs"></i><span class="hidden sm:inline">Quay lại giỏ</span><span class="bg-[var(--ink)] text-white text-xs min-w-[20px] h-5 grid place-items-center rounded-full px-1.5"><?php echo $cartCount; ?></span></a></div>
+    <div class="ml-auto flex items-center gap-2"><div class="relative group">
+      <button class="hidden md:flex items-center gap-2 pill h-10 px-4 text-sm">
+        <i class="fa-regular fa-user"></i><span class="max-w-[110px] truncate"><?php echo $displayName; ?></span>
+        <i class="fa-solid fa-chevron-down text-[10px] opacity-40"></i>
+      </button>
+      <div class="hidden group-hover:block absolute right-0 top-[44px] bg-white border border-[var(--line)] rounded-2xl shadow-xl w-56 overflow-hidden z-50">
+        <?php if(isLoggedIn()): ?>
+          <a href="profile.php" class="flex items-center gap-2.5 px-4 py-3 text-sm hover:bg-[var(--paper)]"><i class="fa-regular fa-user text-xs opacity-50"></i>Tài khoản của tôi</a>
+          <?php if(isAdmin()): ?><a href="admin.php" class="flex items-center gap-2.5 px-4 py-3 text-sm font-medium hover:bg-[var(--paper)]"><i class="fa-solid fa-shield-halved text-xs"></i>Trang quản trị</a><?php endif; ?>
+          <a href="logout.php" class="block px-4 py-3 text-sm text-[var(--terracotta)] hover:bg-[var(--paper)] border-t border-[var(--line)]">Đăng xuất</a>
+        <?php else: ?>
+          <a href="login.php" class="block px-4 py-3 text-sm hover:bg-[var(--paper)]">Đăng nhập</a>
+          <a href="register.php" class="block px-4 py-3 text-sm hover:bg-[var(--paper)]">Tạo tài khoản</a>
+        <?php endif; ?>
+      </div>
+    </div><a href="cart.php" class="pill h-10 px-4 flex items-center gap-2 text-sm"><i class="fa-solid fa-arrow-left text-xs"></i><span class="hidden sm:inline">Quay lại giỏ</span><span class="bg-[var(--ink)] text-white text-xs min-w-[20px] h-5 grid place-items-center rounded-full px-1.5"><?php echo $cartCount; ?></span></a></div>
   </div>
 </header>
 
